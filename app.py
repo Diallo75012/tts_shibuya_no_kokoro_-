@@ -39,6 +39,7 @@ def index():
     generated_text = None
     error_message = None
     audio_file_url = None
+    selected_voice = None
 
     if request.method == 'POST':
         text = request.form['text_input']
@@ -89,6 +90,7 @@ def index():
 
     return render_template(
         'index.html',
+        selected_voice=selected_voice,
         generated_text=generated_text,
         audio_file_url=audio_file_url,
         error_message=error_message

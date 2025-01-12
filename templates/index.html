@@ -66,7 +66,7 @@
         #audio-controls {
             margin-top: 20px;
         }
-
+   
         #audio-visual {
             height: 20px;
             width: 100%;
@@ -115,7 +115,7 @@
         <input type="submit" value="Convert to Voice">
     </form>
     {% if generated_text %}
-        <p id="output-text">Text Output: {{ generated_text }}</p>
+        <p id="output-text">{{ selected_voice[3:] }}: {{ generated_text }}</p>
         <div id="audio-visual">
             <div id="moving-line"></div>
         </div>
@@ -138,7 +138,11 @@
 
         // Start moving line when audio is played
         audioPlayer.addEventListener('play', () => {
-            startMovingLine();
+            if (audioPlayer.duration > 0) {
+                startMovingLine();
+            } else {
+                console.error("Audio duration is 0 or invalid.");
+            }
         });
 
         // Stop moving line when audio is paused or ends
@@ -152,11 +156,17 @@
 
         function startMovingLine() {
             const duration = audioPlayer.duration;
+            if (!duration || duration <= 0) {
+                console.error("Invalid audio duration.");
+                return;
+            }
+
             const visualWidth = audioVisual.offsetWidth;
 
             function animateLine() {
                 const currentTime = audioPlayer.currentTime;
-                movingLine.style.left = (currentTime / duration) * visualWidth + 'px';
+                const progress = (currentTime / duration) * visualWidth;
+                movingLine.style.left = `${progress}px`;
                 animationFrameId = requestAnimationFrame(animateLine);
             }
 
@@ -167,7 +177,10 @@
             cancelAnimationFrame(animationFrameId);
             movingLine.style.left = '0';
         }
+    } else {
+        console.error("Audio player element not found.");
     }
 </script>
+
 </body>
 </html>

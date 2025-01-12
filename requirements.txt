@@ -45,6 +45,7 @@ nvidia-nvtx-cu12==12.4.127
 packaging==24.2
 phonemizer==3.3.0
 pillow==10.2.0
+pip-chill==1.0.3
 pycparser==2.22
 pylatexenc==2.10
 pyparsing==3.2.1
