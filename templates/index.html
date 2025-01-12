@@ -1,169 +1,140 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Cyberpunk TTS</title>
+    <title>KOKORO SWAN - Cyberpunk TTS</title>
     <style>
-         body {
-    background-color: #0F0F0F;
-    color: #00FF00; /* Neon Green for Cyberpunk Feel */
-    font-family: 'Courier New', monospace;
-    margin: 0;
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    min-height: 100vh;
-    overflow: hidden; /* Prevent scroll bars */
-}
+        body {
+            background-color: #0F0F0F;
+            color: #00FF00;
+            font-family: 'Courier New', monospace;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            min-height: 100vh;
+        }
 
-.container {
-    background-color: #1A1A1A; /* Darker background for contrast */
-    padding: 30px;
-    border-radius: 10px;
-    box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
-    width: 60%;
-    max-width: 800px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
+        header {
+            width: 100%;
+            text-align: center;
+            padding: 20px;
+            font-size: 2em;
+            font-weight: bold;
+            color: #00FF00;
+            background-color: #1A1A1A;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
+            margin-bottom: 20px;
+        }
 
+        .container {
+            background-color: #1A1A1A;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
+            width: 60%;
+            max-width: 800px;
+            text-align: center;
+        }
 
-.form-group {
-    margin-bottom: 20px;
-    width: 100%; /* Full width inside container */
-}
+        input[type="text"], select {
+            background-color: #2A2A2A;
+            color: #00FF00;
+            border: 1px solid #00FF00;
+            padding: 12px;
+            border-radius: 5px;
+            width: 100%;
+            box-sizing: border-box;
+            margin-bottom: 20px;
+        }
 
+        input[type="submit"] {
+            background-color: #00FF00;
+            color: #0F0F0F;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
 
-input[type="text"], select {
-     background-color: #2A2A2A;
-     color: #00FF00;
-     border: 1px solid #00FF00;
-     padding: 12px;
-     border-radius: 5px;
-     width: calc(100% - 22px); /* Subtract padding */
-     box-sizing: border-box;
-      font-family: 'Courier New', monospace;
-}
+        input[type="submit"]:hover {
+            background-color: #00CC00;
+        }
 
-select {
-    appearance: none; /* Remove default styling */
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    padding-right: 30px; /* Adjust for dropdown arrow */
-    background-image: url('data:image/svg+xml;utf8,<svg fill="%2300FF00" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>');
-     background-repeat: no-repeat;
-     background-position: right 10px center;
-}
+        #audio-controls {
+            margin-top: 20px;
+        }
 
+        #audio-visual {
+            height: 20px;
+            width: 100%;
+            background-color: #333;
+            margin: 10px 0;
+            position: relative;
+            overflow: hidden;
+        }
 
-select::-ms-expand {
-  display: none;  /* IE specific - remove arrow*/
-}
+        #moving-line {
+            position: absolute;
+            height: 100%;
+            background-color: #00FF00;
+            width: 5px;
+            left: 0;
+            transition: left 0.1s linear;
+        }
 
-input[type="submit"] {
-    background-color: #00FF00;
-    color: #0F0F0F;
-    border: none;
-    padding: 12px 20px;
-    border-radius: 5px;
-    cursor: pointer;
-     font-family: 'Courier New', monospace;
-}
-
-input[type="submit"]:hover {
-    background-color: #00CC00; /* Slightly darker green */
-}
-
-
-
-#audio-controls {
-    margin-top: 20px;
-        width: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-
-}
-
-#audio-visual {
-    height: 20px;
-        width: 100%;
-    background-color: #333;
-    margin: 10px 0;
-    position: relative;
-    overflow: hidden;
-}
-
-#moving-line {
-    position: absolute;
-    height: 100%;
-    background-color: #00FF00;
-    width: 5px;
-        left: 0;
-    transition: left 0.1s linear;
-}
-
-#output-text{
-    margin-top: 20px;
-        word-wrap: break-word;
-        text-align: center;
-}
+        footer {
+            margin-top: 20px;
+            text-align: center;
+            color: #00FF00;
+        }
     </style>
-
 </head>
 <body>
 <header>KOKORO SWAN</header>
 <div class="container">
-     <h1>Text-to-Speech</h1>
+    <h1>Text-to-Speech</h1>
     <form method="post">
-            <div class="form-group">
-           <label for="text_input">Enter Text:</label><br>
-            <input type="text" id="text_input" name="text_input">
-        </div>
-        <div class="form-group">
-        <label for="voice_select">Choose Voice:</label><br>
-        <select id ="voice_select"name="voice_select">
-          <option value="af">af</option>
+        <input type="text" id="text_input" name="text_input" placeholder="Enter your text here" required>
+        <select id="voice_select" name="voice_select">
+            <option value="af">af</option>
             <option value="af_bella">bella</option>
             <option value="af_nicole">nicole</option>
-             <option value="af_sarah">sarah</option>
-             <option value="af_sky">sky</option>
-             <option value="am_adam">adam</option>
-            <option value="am_ichael">michael</option>
+            <option value="af_sarah">sarah</option>
+            <option value="af_sky">sky</option>
+            <option value="am_adam">adam</option>
+            <option value="am_michael">michael</option>
             <option value="bf_emma">emma</option>
-             <option value="bf_isabella">isabella</option>
-             <option value="bm_george">george</option>
-             <option value="bm_lewis">lewis</option>
-           </select>
-           </div>
-
+            <option value="bf_isabella">isabella</option>
+            <option value="bm_george">george</option>
+            <option value="bm_lewis">lewis</option>
+        </select>
         <input type="submit" value="Convert to Voice">
     </form>
-
-
-    <div id ="audio-controls">
-
-    {% if audio_data %}
-         <p id ="output-text"> Text Output: {{ generated_text }}</p>
+    {% if generated_text %}
+        <p id="output-text">Text Output: {{ generated_text }}</p>
         <div id="audio-visual">
             <div id="moving-line"></div>
         </div>
         <audio id="audio-player" controls autoplay>
-            <source src="data:audio/wav;base64,{{ audio_data | to_base64 }}" type="audio/wav">
-                Your browser does not support the audio element.
+            <source src="{{ audio_file_url }}" type="audio/wav">
+            Your browser does not support the audio element.
         </audio>
+    {% elif error_message %}
+        <p style="color: red;">{{ error_message }}</p>
     {% endif %}
-    </div>
-    <footer>&copy; Creditizens 2025</footer>
 </div>
+<footer>&copy; Creditizens 2025</footer>
 <script>
     const audioPlayer = document.getElementById('audio-player');
     const movingLine = document.getElementById('moving-line');
     const audioVisual = document.getElementById('audio-visual');
 
     if (audioPlayer) {
+        let animationFrameId;
+
         // Start moving line when audio is played
         audioPlayer.addEventListener('play', () => {
             startMovingLine();
@@ -181,12 +152,10 @@ input[type="submit"]:hover {
         function startMovingLine() {
             const duration = audioPlayer.duration;
             const visualWidth = audioVisual.offsetWidth;
-            let animationFrameId;
 
             function animateLine() {
                 const currentTime = audioPlayer.currentTime;
                 movingLine.style.left = (currentTime / duration) * visualWidth + 'px';
-
                 animationFrameId = requestAnimationFrame(animateLine);
             }
 
@@ -199,6 +168,5 @@ input[type="submit"]:hover {
         }
     }
 </script>
-
 </body>
 </html>

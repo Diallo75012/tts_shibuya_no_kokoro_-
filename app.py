@@ -1,9 +1,11 @@
-from flask import Flask, request, render_template
+from flask import Flask, request, render_template, url_for
 import torch
 from models import build_model
 from kokoro import generate
 import os
-import base64
+import soundfile as sf
+import numpy as np
+import time
 
 app = Flask(__name__)
 
@@ -13,7 +15,6 @@ device = 'cpu'
 # Load the model
 def load_model(path):
     try:
-        # Remove weights_only argument and load model normally
         return build_model(path, device)
     except Exception as e:
         print(f"Error loading model: {e}")
@@ -22,17 +23,9 @@ def load_model(path):
 # Load the voicepack
 def load_voicepack(path):
     if os.path.exists(path):
-        # Ensure map_location='cpu' for loading on CPU
         return torch.load(path, map_location='cpu')
     else:
         raise FileNotFoundError(f"Voicepack {path} not found.")
-
-# Custom Jinja2 filter to encode data as Base64
-@app.template_filter('to_base64')
-def to_base64(data):
-    if isinstance(data, (bytes, bytearray)):
-        return base64.b64encode(data).decode('utf-8')
-    return data
 
 # Initialize the model and default voicepack
 model_path = 'kokoro-v0_19.pth'
@@ -42,6 +35,11 @@ voicepack = load_voicepack(default_voicepack_path)
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
+    # Initialize variables to update the UI dynamically
+    generated_text = None
+    error_message = None
+    audio_file_url = None
+
     if request.method == 'POST':
         text = request.form['text_input']
         selected_voice = request.form['voice_select']
@@ -56,19 +54,49 @@ def index():
         # Generate audio
         try:
             audio, phonemes = generate(model, text, voicepack)
-            # Convert audio to base64 for embedding
-            audio_base64 = base64.b64encode(audio.tobytes()).decode('utf-8')
-            return render_template(
-                'index.html',
-                generated_text=text,
-                audio_data=audio_base64
-            )
+
+            # Debugging the generated audio
+            print(f"Audio Type: {type(audio)}")
+            print(f"Audio Min: {np.min(audio) if isinstance(audio, np.ndarray) else 'Unknown'}")
+            print(f"Audio Max: {np.max(audio) if isinstance(audio, np.ndarray) else 'Unknown'}")
+            print(f"Audio Length: {len(audio) if hasattr(audio, '__len__') else 'Unknown'}")
+
+            # Ensure the audio is valid and convert to NumPy array
+            if isinstance(audio, torch.Tensor):
+                audio_np = audio.cpu().numpy()
+            elif isinstance(audio, np.ndarray):
+                audio_np = audio
+            else:
+                raise ValueError("Invalid audio format returned by generate function")
+
+            # Normalize audio to 16-bit range (-32768 to 32767)
+            audio_np = np.clip(audio_np, -1.0, 1.0)  # Ensure values are between -1 and 1
+            audio_np = (audio_np * 32767).astype(np.int16)
+
+            # Save as a .wav file using soundfile
+            wav_path = "static/generated_audio.wav"
+            sf.write(wav_path, audio_np, samplerate=22050, subtype='PCM_16')
+
+            # Add a timestamp to force the browser to fetch the latest file
+            audio_file_url = url_for('static', filename='generated_audio.wav', t=time.time())
+
+            # Update the generated text to match the latest submission
+            generated_text = text
+
         except Exception as e:
             print(f"Error generating audio: {e}")
-            return render_template('index.html', error_message="Failed to generate audio. Please try again.")
+            error_message = "Failed to generate audio. Please try again."
 
-    return render_template('index.html')
+    return render_template(
+        'index.html',
+        generated_text=generated_text,
+        audio_file_url=audio_file_url,
+        error_message=error_message
+    )
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    # Ensure the static directory exists for the .wav file
+    if not os.path.exists("static"):
+        os.makedirs("static")
 
+    app.run(debug=True)
